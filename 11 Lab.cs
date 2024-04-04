@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 class Program
@@ -41,24 +40,27 @@ class Program
 
     static void Main(string[] args)
     {
-        Console.WriteLine("Введіть x:");
+        Console.WriteLine("Enter x:");
         double x = double.Parse(Console.ReadLine());
 
-        Console.WriteLine("Введіть кількість ітерацій:");
+        Console.WriteLine("Enter number of iterations:");
         int iterations = int.Parse(Console.ReadLine());
 
-        Console.WriteLine("Введіть точність:");
+        Console.WriteLine("Enter precision:");
         double precision = double.Parse(Console.ReadLine());
 
-        Task<double> oddTask = Task.Run(() => Ln(x, iterations));
-        Task<double> evenTask = Task.Run(() => Ln(x, iterations));
+        double oddResult = 0;
+        double evenResult = 0;
 
-        Task.WaitAll(oddTask, evenTask);
+        Parallel.Invoke(
+            () => oddResult = Ln(x, iterations),
+            () => evenResult = Ln(x, iterations)
+        );
 
-        double result = oddTask.Result + evenTask.Result;
-        Console.WriteLine($"Використання результату {iterations} ітерацій: {result}");
+        double result = oddResult + evenResult;
+        Console.WriteLine($"Using {iterations} iterations result: {result}");
 
         double resultWithPrecision = LnWithPrecision(x, precision);
-        Console.WriteLine($"Результат з точністю {precision}: {resultWithPrecision}");
+        Console.WriteLine($"Result with precision {precision}: {resultWithPrecision}");
     }
 }

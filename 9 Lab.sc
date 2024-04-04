@@ -1,8 +1,65 @@
 using System;
-using System.Collections.Generic;
 
 namespace LibraryManagementSystem
 {
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Створення об'єктів книг та читачів
+            Book book1 = new Book { Title = "Book 1", Author = "Author 1", Genre = "Genre 1", SecurityDeposit = 5m, RentalCost = 10m };
+            Book book2 = new Book { Title = "Book 2", Author = "Author 2", Genre = "Genre 2", SecurityDeposit = 5m, RentalCost = 15m };
+
+            // Створення бібліотеки
+            Library library = new Library();
+
+            // Введення даних читача та книги
+            Console.WriteLine("Enter your full name: ");
+            string fullName = Console.ReadLine();
+
+            Console.WriteLine("Enter your phone number: ");
+            string phoneNumber = Console.ReadLine();
+
+            Console.WriteLine("Enter the book title: ");
+            string bookTitle = Console.ReadLine();
+
+            Console.WriteLine("Enter the rental duration (in days): ");
+            int rentalDuration = int.Parse(Console.ReadLine());
+
+            Console.WriteLine("Enter the rental cost: ");
+            decimal rentalCost = decimal.Parse(Console.ReadLine());
+
+            Console.WriteLine("Enter the expected return date (yyyy-mm-dd): ");
+            DateTime expectedReturnDate = DateTime.Parse(Console.ReadLine());
+
+            // Створення об'єкта читача та запиту на прокат
+            Reader reader = new Reader { FullName = fullName, PhoneNumber = phoneNumber };
+            RentalRequest request = new RentalRequest { Book = new Book { Title = bookTitle }, Reader = reader, IssueDate = DateTime.Now, DueDate = DateTime.Now.AddDays(rentalDuration), RentalCost = rentalCost };
+
+            // Додавання запиту на прокат до бібліотеки
+            library.AddRentalRequest(request);
+
+            // Введення даних про повернення книги
+            Console.WriteLine("Enter 1 if the book is damaged, otherwise enter 0: ");
+            int isDamaged = int.Parse(Console.ReadLine());
+
+            if (isDamaged == 1)
+            {
+                Console.WriteLine("Enter the amount of damage: ");
+                decimal damageAmount = decimal.Parse(Console.ReadLine());
+
+                // Перевірка книги та розрахунок суми, яку треба вирахувати з застави
+                library.CheckBook(request, isDamaged, damageAmount);
+            }
+            else
+            {
+                Console.WriteLine("The book is intact. You will get back your security deposit.");
+            }
+
+            Console.ReadLine();
+        }
+    }
+
     // Клас, який представляє книгу
     class Book
     {
@@ -16,10 +73,7 @@ namespace LibraryManagementSystem
     // Клас, який представляє читача
     class Reader
     {
-        public string LastName { get; set; }
-        public string FirstName { get; set; }
-        public string MiddleName { get; set; }
-        public string Address { get; set; }
+        public string FullName { get; set; }
         public string PhoneNumber { get; set; }
     }
 
@@ -30,73 +84,33 @@ namespace LibraryManagementSystem
         public Reader Reader { get; set; }
         public DateTime IssueDate { get; set; }
         public DateTime DueDate { get; set; }
-        public decimal Penalty { get; set; } // штраф
+        public decimal RentalCost { get; set; }
     }
 
+    // Клас, який представляє бібліотеку
     class Library
     {
-        private List<RentalRequest> rentalRequests = new List<RentalRequest>();
-
-        // Додати запит на прокат книги
+        // Метод для додавання запиту на прокат до бібліотеки
         public void AddRentalRequest(RentalRequest request)
         {
-            rentalRequests.Add(request);
+            // Тут можна додати логіку для зберігання запитів на прокат у певній структурі даних
+            Console.WriteLine("Rental request added successfully.");
         }
 
-        // Розрахувати вартість прокату з урахуванням терміну прокату та знижок
-        public decimal CalculateRentalCost(Book book, DateTime issueDate, DateTime dueDate, bool isDiscounted)
+        // Метод для перевірки книги при поверненні
+        public void CheckBook(RentalRequest request, int isDamaged, decimal damageAmount)
         {
-            TimeSpan duration = dueDate - issueDate;
-            decimal rentalCost = book.RentalCost;
-
-            // Розрахунок вартості з урахуванням терміну прокату
-            if (duration.Days > 7)
+            if (isDamaged == 1)
             {
-                // Штраф за кожен день запізнення
-                int daysOverdue = duration.Days - 7;
-                rentalCost += daysOverdue * 0.5m; // наприклад, штраф 0.5 долара за кожен день запізнення
+                // Обчислення суми, яку потрібно вирахувати з застави через збитки
+                decimal amountToDeduct = damageAmount;
+                Console.WriteLine($"The book is damaged. The amount of damage is {amountToDeduct}. This amount will be deducted from your security deposit.");
             }
-
-            // Знижка для деяких категорій читачів
-            if (isDiscounted)
+            else
             {
-                rentalCost *= 0.9m; // наприклад, 10% знижка для певних категорій читачів
+                // Виведення повідомлення, що книга ціла і застава повертається
+                Console.WriteLine("The book is intact. You will get back your security deposit.");
             }
-
-            return rentalCost;
-        }
-    }
-
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            // Створення об'єктів книг, читачів і запитів на прокат
-
-            Book book1 = new Book { Title = "Book 1", Author = "Author 1", Genre = "Genre 1", SecurityDeposit = 5m, RentalCost = 10m };
-            Book book2 = new Book { Title = "Book 2", Author = "Author 2", Genre = "Genre 2", SecurityDeposit = 5m, RentalCost = 15m };
-
-            Reader reader1 = new Reader { LastName = "Last Name 1", FirstName = "First Name 1", MiddleName = "Middle Name 1", Address = "Address 1", PhoneNumber = "Phone Number 1" };
-            Reader reader2 = new Reader { LastName = "Last Name 2", FirstName = "First Name 2", MiddleName = "Middle Name 2", Address = "Address 2", PhoneNumber = "Phone Number 2" };
-
-            RentalRequest request1 = new RentalRequest { Book = book1, Reader = reader1, IssueDate = DateTime.Now, DueDate = DateTime.Now.AddDays(10), Penalty = 0 };
-            RentalRequest request2 = new RentalRequest { Book = book2, Reader = reader2, IssueDate = DateTime.Now, DueDate = DateTime.Now.AddDays(5), Penalty = 0 };
-
-            // Взаємодія з бібліотекою
-
-            Library library = new Library();
-            library.AddRentalRequest(request1);
-            library.AddRentalRequest(request2);
-
-            // Приклад розрахунку вартості прокату
-
-            decimal rentalCost1 = library.CalculateRentalCost(book1, request1.IssueDate, request1.DueDate, isDiscounted: false);
-            decimal rentalCost2 = library.CalculateRentalCost(book2, request2.IssueDate, request2.DueDate, isDiscounted: true);
-
-            Console.WriteLine($"Rental cost for Book 1: {rentalCost1}");
-            Console.WriteLine($"Rental cost for Book 2: {rentalCost2}");
-
-            Console.ReadLine();
         }
     }
 }

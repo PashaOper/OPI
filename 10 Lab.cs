@@ -2,16 +2,50 @@ using System;
 
 namespace LibraryManagementSystem
 {
+    // Інтерфейс книги
+    interface IBook
+    {
+        string Title { get; set; }
+        string Author { get; set; }
+        string Genre { get; set; }
+        decimal SecurityDeposit { get; set; }
+        decimal RentalCost { get; set; }
+    }
+
+    // Інтерфейс читача
+    interface IReader
+    {
+        string FullName { get; set; }
+        string PhoneNumber { get; set; }
+    }
+
+    // Інтерфейс запиту на прокат
+    interface IRentalRequest
+    {
+        IBook Book { get; set; }
+        IReader Reader { get; set; }
+        DateTime IssueDate { get; set; }
+        DateTime DueDate { get; set; }
+        decimal RentalCost { get; set; }
+    }
+
+    // Інтерфейс бібліотеки
+    interface ILibrary
+    {
+        void AddRentalRequest(IRentalRequest request);
+        void CheckBook(IRentalRequest request, int isDamaged, decimal damageAmount);
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
             // Створення об'єктів книг та читачів
-            Book book1 = new Book { Title = "Book 1", Author = "Author 1", Genre = "Genre 1", SecurityDeposit = 5m, RentalCost = 10m };
-            Book book2 = new Book { Title = "Book 2", Author = "Author 2", Genre = "Genre 2", SecurityDeposit = 5m, RentalCost = 15m };
+            IBook book1 = new Book { Title = "Book 1", Author = "Author 1", Genre = "Genre 1", SecurityDeposit = 5m, RentalCost = 10m };
+            IBook book2 = new Book { Title = "Book 2", Author = "Author 2", Genre = "Genre 2", SecurityDeposit = 5m, RentalCost = 15m };
 
             // Створення бібліотеки
-            Library library = new Library();
+            ILibrary library = new Library();
 
             // Введення даних читача та книги
             Console.WriteLine("Enter your full name: ");
@@ -33,8 +67,8 @@ namespace LibraryManagementSystem
             DateTime expectedReturnDate = DateTime.Parse(Console.ReadLine());
 
             // Створення об'єкта читача та запиту на прокат
-            Reader reader = new Reader { FullName = fullName, PhoneNumber = phoneNumber };
-            RentalRequest request = new RentalRequest { Book = new Book { Title = bookTitle }, Reader = reader, IssueDate = DateTime.Now, DueDate = DateTime.Now.AddDays(rentalDuration), RentalCost = rentalCost };
+            IReader reader = new Reader { FullName = fullName, PhoneNumber = phoneNumber };
+            IRentalRequest request = new RentalRequest { Book = new Book { Title = bookTitle }, Reader = reader, IssueDate = DateTime.Now, DueDate = DateTime.Now.AddDays(rentalDuration), RentalCost = rentalCost };
 
             // Додавання запиту на прокат до бібліотеки
             library.AddRentalRequest(request);
@@ -61,7 +95,7 @@ namespace LibraryManagementSystem
     }
 
     // Клас, який представляє книгу
-    class Book
+    class Book : IBook
     {
         public string Title { get; set; }
         public string Author { get; set; }
@@ -71,34 +105,34 @@ namespace LibraryManagementSystem
     }
 
     // Клас, який представляє читача
-    class Reader
+    class Reader : IReader
     {
         public string FullName { get; set; }
         public string PhoneNumber { get; set; }
     }
 
     // Клас, який представляє запит на книгу в прокаті
-    class RentalRequest
+    class RentalRequest : IRentalRequest
     {
-        public Book Book { get; set; }
-        public Reader Reader { get; set; }
+        public IBook Book { get; set; }
+        public IReader Reader { get; set; }
         public DateTime IssueDate { get; set; }
         public DateTime DueDate { get; set; }
         public decimal RentalCost { get; set; }
     }
 
     // Клас, який представляє бібліотеку
-    class Library
+    class Library : ILibrary
     {
         // Метод для додавання запиту на прокат до бібліотеки
-        public void AddRentalRequest(RentalRequest request)
+        public void AddRentalRequest(IRentalRequest request)
         {
             // Тут можна додати логіку для зберігання запитів на прокат у певній структурі даних
             Console.WriteLine("Rental request added successfully.");
         }
 
         // Метод для перевірки книги при поверненні
-        public void CheckBook(RentalRequest request, int isDamaged, decimal damageAmount)
+        public void CheckBook(IRentalRequest request, int isDamaged, decimal damageAmount)
         {
             if (isDamaged == 1)
             {
